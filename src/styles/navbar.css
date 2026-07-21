@@ -1,0 +1,165 @@
+/* ===========================
+   Navbar
+=========================== */
+
+.navbar {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(252, 251, 254, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(138, 111, 209, 0.08);
+  box-shadow: 0 8px 25px rgba(138, 111, 209, 0.08);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 0;
+}
+
+/* ===========================
+   Logo
+=========================== */
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.logo-icon {
+  font-size: 2.1rem;
+  color: var(--color-primary);
+}
+
+.logo h2 {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.logo h2 span {
+  color: var(--color-primary);
+}
+
+/* ===========================
+   Navigation Links
+=========================== */
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+}
+
+.nav-links a {
+  position: relative;
+  color: var(--color-text-main);
+  font-size: 0.98rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: var(--color-primary);
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -7px;
+  width: 0%;
+  height: 2.5px;
+  background: var(--color-primary);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+/* ===========================
+   Buttons
+=========================== */
+
+.nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.login-btn,
+.register-btn {
+  padding: 11px 24px;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-btn {
+  background: var(--color-light-accent);
+  color: var(--color-primary);
+}
+
+.login-btn:hover {
+  background: #ebe3ff;
+  transform: translateY(-3px);
+}
+
+.register-btn {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(138, 111, 209, 0.25);
+}
+
+.register-btn:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(138, 111, 209, 0.35);
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (max-width: 768px) {
+
+  .nav-container {
+    flex-direction: column;
+    gap: 20px;
+    padding: 18px 0;
+  }
+
+  .logo h2 {
+    font-size: 1.5rem;
+  }
+
+  .nav-links {
+    gap: 22px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-links a {
+    font-size: 0.95rem;
+  }
+
+  .nav-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .login-btn,
+  .register-btn {
+    padding: 10px 22px;
+  }
+}

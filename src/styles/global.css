@@ -1,0 +1,192 @@
+/* ===========================
+   Global Reset
+=========================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===========================
+   Color Palette
+=========================== */
+:root {
+  --color-primary: #8A6FD1;
+  --color-primary-hover: #7358C3;
+  --color-light-accent: #F3EEFF;
+  --color-bg: #FCFBFE;
+  --color-text-main: #2F3542;
+  --color-text-muted: #6B7280;
+  --color-white: #FFFFFF;
+
+  --shadow-sm: 0 4px 12px rgba(138, 111, 209, 0.08);
+  --shadow-md: 0 10px 30px rgba(138, 111, 209, 0.12);
+  --shadow-lg: 0 18px 45px rgba(138, 111, 209, 0.16);
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+
+  --transition: all 0.3s ease;
+}
+
+/* ===========================
+   Base Styles
+=========================== */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text-main);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ===========================
+   Common Elements
+=========================== */
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  width: 100%;
+  display: block;
+}
+
+/* ===========================
+   Layout
+=========================== */
+.container {
+  width: min(90%, 1200px);
+  margin: auto;
+}
+
+section {
+  padding: 100px 0;
+}
+
+/* ===========================
+   Typography
+=========================== */
+.section-title {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 700;
+  color: var(--color-text-main);
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.section-title span {
+  color: var(--color-primary);
+}
+
+.section-subtitle {
+  max-width: 680px;
+  margin: 0 auto 70px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+/* ===========================
+   Buttons
+=========================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===========================
+   Cards
+=========================== */
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ===========================
+   Utility Classes
+=========================== */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.bg-accent {
+  background: var(--color-light-accent);
+}
+
+/* ===========================
+   Scrollbar
+=========================== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f4f4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ===========================
+   Responsive
+=========================== */
+@media (max-width: 768px) {
+  section {
+    padding: 80px 0;
+  }
+
+  .section-subtitle {
+    margin-bottom: 50px;
+    font-size: 0.98rem;
+  }
+
+  .container {
+    width: 92%;
+  }
+}
