@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 import {
   MdEmail,
@@ -25,6 +27,7 @@ function AuthForm({ role, isRegister = false }) {
   });
 
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -81,7 +84,7 @@ function AuthForm({ role, isRegister = false }) {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
 
     const validationErrors = validate();
@@ -93,7 +96,77 @@ function AuthForm({ role, isRegister = false }) {
 
     setErrors({});
 
-    alert("Form validated successfully!");
+  try {
+  if (isRegister) {
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+    });
+if (error) {
+  alert(error.message);
+  return;
+}
+
+// Save profile after successful signup
+if (data.user) {
+  if (role === "doctor") {
+   const { error: profileError } = await supabase
+  .from("doctors")
+  .insert({
+    id: data.user.id,
+    full_name: formData.fullName,
+    email: formData.email,
+    specialty: formData.specialty,
+  });
+
+console.log(profileError);
+
+if (profileError) {
+  alert(profileError.message);
+}
+  
+  } else {
+    await supabase.from("patients").insert({
+      id: data.user.id,
+      full_name: formData.fullName,
+      email: formData.email,
+      age: Number(formData.age),
+      gender: formData.gender,
+    });
+  }
+}
+
+alert("Account created successfully!");
+
+navigate(
+  role === "doctor"
+    ? "/doctor/dashboard"
+    : "/patient/dashboard"
+);
+  } else {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: formData.email,
+      password: formData.password,
+    });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert("Login successful!");
+
+    console.log(data);
+
+    navigate(
+      role === "doctor"
+        ? "/doctor/dashboard"
+        : "/patient/dashboard"
+    );
+  }
+} catch (err) {
+  alert(err.message);
+}
   };
 
 return (

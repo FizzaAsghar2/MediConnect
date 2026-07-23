@@ -10,6 +10,11 @@ import DoctorRegister from "./pages/auth/DoctorRegister";
 import PatientLogin from "./pages/auth/PatientLogin";
 import PatientRegister from "./pages/auth/PatientRegister";
 
+import DoctorDashboard from "./pages/dashboard/DoctorDashboard";
+import PatientDashboard from "./pages/dashboard/PatientDashboard";
+
+import ProtectedRoute from "./components/protected/ProtectedRoute";
+
 // Home Page
 function Home() {
   return (
@@ -35,6 +40,26 @@ function App() {
       {/* Patient Authentication */}
       <Route path="/patient/login" element={<PatientLogin />} />
       <Route path="/patient/register" element={<PatientRegister />} />
+
+      {/* Doctor Dashboard */}
+      <Route
+        path="/doctor/dashboard"
+        element={
+          <ProtectedRoute>
+            <DoctorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Patient Dashboard */}
+      <Route
+        path="/patient/dashboard"
+        element={
+          <ProtectedRoute>
+            <PatientDashboard />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
