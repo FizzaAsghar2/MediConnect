@@ -13,9 +13,12 @@ import PatientRegister from "./pages/auth/PatientRegister";
 import DoctorDashboard from "./pages/dashboard/DoctorDashboard";
 import PatientDashboard from "./pages/dashboard/PatientDashboard";
 
+import DoctorList from "./pages/dashboard/DoctorList";
+import Appointments from "./pages/dashboard/Appointments";
+import DoctorAppointments from "./pages/dashboard/DoctorAppointments";
+
 import ProtectedRoute from "./components/protected/ProtectedRoute";
 
-// Home Page
 function Home() {
   return (
     <>
@@ -30,18 +33,16 @@ function Home() {
 function App() {
   return (
     <Routes>
-      {/* Home */}
       <Route path="/" element={<Home />} />
 
-      {/* Doctor Authentication */}
+      {/* Auth */}
       <Route path="/doctor/login" element={<DoctorLogin />} />
       <Route path="/doctor/register" element={<DoctorRegister />} />
 
-      {/* Patient Authentication */}
       <Route path="/patient/login" element={<PatientLogin />} />
       <Route path="/patient/register" element={<PatientRegister />} />
 
-      {/* Doctor Dashboard */}
+      {/* Doctor */}
       <Route
         path="/doctor/dashboard"
         element={
@@ -51,12 +52,39 @@ function App() {
         }
       />
 
-      {/* Patient Dashboard */}
+      <Route
+        path="/doctor/appointments"
+        element={
+          <ProtectedRoute>
+            <DoctorAppointments />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Patient */}
       <Route
         path="/patient/dashboard"
         element={
           <ProtectedRoute>
             <PatientDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/doctors"
+        element={
+          <ProtectedRoute>
+            <DoctorList />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/appointments"
+        element={
+          <ProtectedRoute>
+            <Appointments />
           </ProtectedRoute>
         }
       />

@@ -1,23 +1,57 @@
-import { supabase } from "../../lib/supabase";
-import { useNavigate } from "react-router-dom";
+import DashboardLayout from "../../components/dashboard/DashboardLayout";
+import DashboardCard from "../../components/dashboard/DashboardCard";
+import useProfile from "../../hooks/useProfile";
+
+import {
+  FaCalendarCheck,
+  FaUserMd,
+  FaClock,
+} from "react-icons/fa";
 
 function PatientDashboard() {
-  const navigate = useNavigate();
+  const { profile, loading } = useProfile("patient");
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
-  };
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <h2>Loading Dashboard...</h2>
+      </DashboardLayout>
+    );
+  }
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1>Patient Dashboard</h1>
-      <p>Welcome Patient!</p>
+    <DashboardLayout>
+      <h1>Welcome, {profile?.full_name}</h1>
 
-      <button onClick={handleLogout}>
-        Logout
-      </button>
-    </div>
+      <div className="dashboard-cards">
+        <DashboardCard
+          title="Appointments"
+          value="0"
+          icon={<FaCalendarCheck />}
+        />
+
+        <DashboardCard
+          title="Doctors"
+          value="0"
+          icon={<FaUserMd />}
+        />
+
+        <DashboardCard
+          title="Pending"
+          value="0"
+          icon={<FaClock />}
+        />
+      </div>
+
+      <div className="profile-card">
+        <h3>Profile Information</h3>
+
+        <p><strong>Name:</strong> {profile?.full_name}</p>
+        <p><strong>Email:</strong> {profile?.email}</p>
+        <p><strong>Age:</strong> {profile?.age}</p>
+        <p><strong>Gender:</strong> {profile?.gender}</p>
+      </div>
+    </DashboardLayout>
   );
 }
 
