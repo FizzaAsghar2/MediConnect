@@ -1,7 +1,10 @@
 import { FaCalendarCheck, FaUserDoctor } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 import "../styles/hero.css";
 
 function Hero() {
+  const navigate = useNavigate();
+
   return (
     <section className="hero">
       <div className="container hero-container">
@@ -10,8 +13,8 @@ function Hero() {
           <span className="hero-tag">Your Health, Our Priority</span>
 
           <h1>
-  Find <span>Trusted Doctors</span> Online
-</h1>
+            Find <span>Trusted Doctors</span> Online
+          </h1>
 
           <p>
             Book appointments, consult experienced doctors online, and manage
@@ -19,11 +22,17 @@ function Hero() {
           </p>
 
           <div className="hero-buttons">
-            <button className="primary-btn">
+            <button
+              className="primary-btn"
+              onClick={() => navigate("/patient/login")}
+            >
               <FaCalendarCheck /> Book Appointment
             </button>
 
-            <button className="secondary-btn">
+            <button
+              className="secondary-btn"
+              onClick={() => navigate("/doctors")}
+            >
               <FaUserDoctor /> Find Doctors
             </button>
           </div>
