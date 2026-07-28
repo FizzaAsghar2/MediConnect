@@ -1,58 +1,69 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 import "../styles/doctors.css";
 
-const doctors = [
-  {
-    id: 1,
-    name: "Dr. Sarah Khan",
-    specialty: "Cardiologist",
-    experience: "10 Years",
-    image: "https://randomuser.me/api/portraits/women/44.jpg",
-  },
-  {
-    id: 2,
-    name: "Dr. Ali Ahmed",
-    specialty: "Dermatologist",
-    experience: "8 Years",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    id: 3,
-    name: "Dr. Ayesha Malik",
-    specialty: "Pediatrician",
-    experience: "12 Years",
-    image: "https://randomuser.me/api/portraits/women/68.jpg",
-  },
-];
-
 function Doctors() {
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  async function fetchDoctors() {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("doctors")
+      .select("*");
+
+    if (error) {
+      console.error(error);
+      setDoctors([]);
+    } else {
+      setDoctors(data);
+    }
+
+    setLoading(false);
+  }
+
   return (
     <div className="doctors-page">
       <div className="container">
         <h1>Our Doctors</h1>
         <p>Choose a doctor according to your healthcare needs.</p>
 
-        <div className="doctor-grid">
-          {doctors.map((doctor) => (
-            <div className="doctor-card" key={doctor.id}>
-              <img src={doctor.image} alt={doctor.name} />
+        {loading ? (
+          <h2>Loading doctors...</h2>
+        ) : doctors.length === 0 ? (
+          <h2>No doctors available.</h2>
+        ) : (
+          <div className="doctor-grid">
+            {doctors.map((doctor) => (
+              <div className="doctor-card" key={doctor.id}>
+                <img
+                  src={doctor.image || "https://via.placeholder.com/150"}
+                  alt={doctor.full_name}
+                />
 
-              <h3>{doctor.name}</h3>
+                <h3>{doctor.full_name}</h3>
 
-              <p>
-                <strong>Specialty:</strong> {doctor.specialty}
-              </p>
+                <p>
+                  <strong>Specialty:</strong> {doctor.specialty}
+                </p>
 
-              <p>
-                <strong>Experience:</strong> {doctor.experience}
-              </p>
+                <p>
+                  <strong>Experience:</strong> {doctor.experience}
+                </p>
 
-              <Link to="/patient/login">
-                <button>Book Appointment</button>
-              </Link>
-            </div>
-          ))}
-        </div>
+                <Link to="/patient/login">
+                  <button>Book Appointment</button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
