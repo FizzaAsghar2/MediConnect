@@ -260,3 +260,59 @@
 .cancelled{
   background:#e74c3c;
 }
+/* ================= Appointment Table ================= */
+
+.appointment-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+    background:#fff;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.appointment-table th{
+    background:var(--color-primary);
+    color:#fff;
+    padding:14px;
+    text-align:left;
+}
+
+.appointment-table td{
+    padding:14px;
+    border-bottom:1px solid #eee;
+}
+
+.appointment-table tr:hover{
+    background:#f9f9f9;
+}
+
+.status{
+    padding:6px 14px;
+    border-radius:20px;
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+}
+
+.pending{
+    background:#f39c12;
+}
+
+.approved{
+    background:#27ae60;
+}
+
+.cancelled{
+    background:#e74c3c;
+}
+
+@media(max-width:768px){
+
+    .appointment-table{
+        display:block;
+        overflow-x:auto;
+    }
+
+}
