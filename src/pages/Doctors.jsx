@@ -57,9 +57,12 @@ function Doctors() {
                   <strong>Experience:</strong> {doctor.experience}
                 </p>
 
-                <Link to="/patient/login">
-                  <button>Book Appointment</button>
-                </Link>
+               <Link
+  to="/book-appointment"
+  state={{ doctor }}
+>
+  <button>Book Appointment</button>
+</Link>
               </div>
             ))}
           </div>
