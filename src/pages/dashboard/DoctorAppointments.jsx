@@ -1,38 +1,50 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
-import { useAuth } from "../../context/AuthContext";
+import { supabase } from "../../supabaseClient";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
+import useProfile from "../../hooks/useProfile";
 
 function DoctorAppointments() {
-  const { user } = useAuth();
+  const { profile, loading } = useProfile("doctor");
   const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
-    if (user) {
+    if (profile) {
       fetchAppointments();
     }
-  }, [user]);
+  }, [profile]);
 
   async function fetchAppointments() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("appointments")
-      .select("*")
-      .eq("doctor_id", user.id);
+      .select(`
+        *,
+        patients (
+          full_name
+        )
+      `)
+      .eq("doctor_id", profile.id)
+      .order("appointment_date", { ascending: true });
 
-    if (!error) {
+    if (data) {
       setAppointments(data);
     }
   }
 
   async function updateStatus(id, status) {
-    const { error } = await supabase
+    await supabase
       .from("appointments")
       .update({ status })
       .eq("id", id);
 
-    if (!error) {
-      fetchAppointments();
-    }
+    fetchAppointments();
+  }
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <h2>Loading...</h2>
+      </DashboardLayout>
+    );
   }
 
   return (
@@ -43,63 +55,55 @@ function DoctorAppointments() {
         <p>No appointments found.</p>
       ) : (
         appointments.map((appointment) => (
-          <div
-            key={appointment.id}
-            className="profile-card"
-          >
+          <div key={appointment.id} className="profile-card">
             <p>
-              <strong>Date:</strong>{" "}
-              {appointment.appointment_date}
+              <strong>Patient:</strong>{" "}
+              {appointment.patients?.full_name || "Unknown Patient"}
             </p>
 
             <p>
-              <strong>Time:</strong>{" "}
-              {appointment.appointment_time}
+              <strong>Date:</strong> {appointment.appointment_date}
             </p>
 
-     <p>
-  <strong>Status:</strong>{" "}
-  <span
-    className={`status ${appointment.status.toLowerCase()}`}
-  >
-    {appointment.status}
-  </span>
-</p>
+            <p>
+              <strong>Time:</strong> {appointment.appointment_time}
+            </p>
 
-            <div
-              style={{
-                marginTop: "15px",
-                display: "flex",
-                gap: "10px",
-              }}
-            >
-              <button
-                className="book-btn"
-                onClick={() =>
-                  updateStatus(
-                    appointment.id,
-                    "Approved"
-                  )
-                }
-              >
-                Approve
-              </button>
+            <p>
+              <strong>Status:</strong>{" "}
+              <span className={`status ${appointment.status.toLowerCase()}`}>
+                {appointment.status}
+              </span>
+            </p>
 
-              <button
-                className="book-btn"
+            {appointment.status === "Pending" && (
+              <div
                 style={{
-                  background: "#dc3545",
+                  display: "flex",
+                  gap: "10px",
+                  marginTop: "15px",
                 }}
-                onClick={() =>
-                  updateStatus(
-                    appointment.id,
-                    "Cancelled"
-                  )
-                }
               >
-                Cancel
-              </button>
-            </div>
+                <button
+                  className="book-btn"
+                  onClick={() =>
+                    updateStatus(appointment.id, "Approved")
+                  }
+                >
+                  Approve
+                </button>
+
+                <button
+                  className="book-btn"
+                  style={{ background: "#dc3545" }}
+                  onClick={() =>
+                    updateStatus(appointment.id, "Cancelled")
+                  }
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         ))
       )}
