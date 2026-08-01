@@ -13,7 +13,8 @@ import PatientRegister from "./pages/auth/PatientRegister";
 import Doctors from "./pages/Doctors";
 import BookAppointment from "./pages/BookAppointment";
 
-import DoctorDashboard from "./pages/dashboard/DoctorDashboard";
+import DoctorDashboard from "./pages/DoctorDashboard";
+import DoctorProfile from "./pages/dashboard/DoctorProfile";
 import PatientDashboard from "./pages/dashboard/PatientDashboard";
 
 import DoctorList from "./pages/dashboard/DoctorList";
@@ -54,6 +55,15 @@ function App() {
         element={
           <ProtectedRoute>
             <DoctorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/doctor/profile"
+        element={
+          <ProtectedRoute>
+            <DoctorProfile />
           </ProtectedRoute>
         }
       />

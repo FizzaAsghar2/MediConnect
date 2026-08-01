@@ -1,102 +1,111 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../../supabaseClient";
+import { Routes, Route } from "react-router-dom";
 
-import DashboardLayout from "../../components/dashboard/DashboardLayout";
-import DashboardCard from "../../components/dashboard/DashboardCard";
-import useProfile from "../../hooks/useProfile";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import Features from "./components/Features";
+import Footer from "./components/Footer";
 
-import {
-  FaCalendarCheck,
-  FaUserInjured,
-  FaClock,
-} from "react-icons/fa";
+import DoctorLogin from "./pages/auth/DoctorLogin";
+import DoctorRegister from "./pages/auth/DoctorRegister";
+import PatientLogin from "./pages/auth/PatientLogin";
+import PatientRegister from "./pages/auth/PatientRegister";
 
-function DoctorDashboard() {
-  const { profile, loading } = useProfile("doctor");
+import Doctors from "./pages/Doctors";
+import BookAppointment from "./pages/BookAppointment";
 
-  const [appointmentCount, setAppointmentCount] = useState(0);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [patientCount, setPatientCount] = useState(0);
+import DoctorDashboard from "./pages/dashboard/DoctorDashboard";
+import DoctorProfile from "./pages/dashboard/DoctorProfile";
+import PatientDashboard from "./pages/dashboard/PatientDashboard";
 
-  useEffect(() => {
-    if (profile) {
-      fetchCounts();
-    }
-  }, [profile]);
+import DoctorList from "./pages/dashboard/DoctorList";
+import Appointments from "./pages/dashboard/Appointments";
+import DoctorAppointments from "./pages/dashboard/DoctorAppointments";
 
-  async function fetchCounts() {
-    // Total appointments
-    const { count: appointments } = await supabase
-      .from("appointments")
-      .select("*", { count: "exact", head: true })
-      .eq("doctor_id", profile.id);
+import ProtectedRoute from "./components/protected/ProtectedRoute";
 
-    // Pending appointments
-    const { count: pending } = await supabase
-      .from("appointments")
-      .select("*", { count: "exact", head: true })
-      .eq("doctor_id", profile.id)
-      .eq("status", "Pending");
-
-    // Unique patients
-    const { data: patientData } = await supabase
-      .from("appointments")
-      .select("patient_id")
-      .eq("doctor_id", profile.id);
-
-    if (patientData) {
-      const uniquePatients = [
-        ...new Set(patientData.map((item) => item.patient_id)),
-      ];
-
-      setPatientCount(uniquePatients.length);
-    }
-
-    setAppointmentCount(appointments || 0);
-    setPendingCount(pending || 0);
-  }
-
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <h2>Loading Dashboard...</h2>
-      </DashboardLayout>
-    );
-  }
-
+function Home() {
   return (
-    <DashboardLayout>
-      <h1>Welcome, Dr. {profile?.full_name}</h1>
-
-      <div className="dashboard-cards">
-        <DashboardCard
-          title="Appointments"
-          value={appointmentCount}
-          icon={<FaCalendarCheck />}
-        />
-
-        <DashboardCard
-          title="Patients"
-          value={patientCount}
-          icon={<FaUserInjured />}
-        />
-
-        <DashboardCard
-          title="Pending"
-          value={pendingCount}
-          icon={<FaClock />}
-        />
-      </div>
-
-      <div className="profile-card">
-        <h3>Profile Information</h3>
-
-        <p><strong>Name:</strong> {profile?.full_name}</p>
-        <p><strong>Email:</strong> {profile?.email}</p>
-        <p><strong>Specialty:</strong> {profile?.specialty}</p>
-      </div>
-    </DashboardLayout>
+    <>
+      <Navbar />
+      <Hero />
+      <Features />
+      <Footer />
+    </>
   );
 }
 
-export default DoctorDashboard;
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+
+      {/* Public Pages */}
+      <Route path="/doctors" element={<Doctors />} />
+      <Route path="/book-appointment" element={<BookAppointment />} />
+
+      {/* Authentication */}
+      <Route path="/doctor/login" element={<DoctorLogin />} />
+      <Route path="/doctor/register" element={<DoctorRegister />} />
+      <Route path="/patient/login" element={<PatientLogin />} />
+      <Route path="/patient/register" element={<PatientRegister />} />
+
+      {/* Doctor Dashboard */}
+      <Route
+        path="/doctor/dashboard"
+        element={
+          <ProtectedRoute>
+            <DoctorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/doctor/profile"
+        element={
+          <ProtectedRoute>
+            <DoctorProfile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/doctor/appointments"
+        element={
+          <ProtectedRoute>
+            <DoctorAppointments />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Patient Dashboard */}
+      <Route
+        path="/patient/dashboard"
+        element={
+          <ProtectedRoute>
+            <PatientDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/appointments"
+        element={
+          <ProtectedRoute>
+            <Appointments />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/doctors"
+        element={
+          <ProtectedRoute>
+            <DoctorList />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+}
+
+export default App;

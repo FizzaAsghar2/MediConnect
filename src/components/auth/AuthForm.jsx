@@ -154,15 +154,15 @@ navigate(
       return;
     }
 
-    alert("Login successful!");
+   alert("Login successful!");
 
-    console.log(data);
-
-    navigate(
-      role === "doctor"
-        ? "/doctor/dashboard"
-        : "/patient/dashboard"
-    );
+setTimeout(() => {
+  navigate(
+    role === "doctor"
+      ? "/doctor/dashboard"
+      : "/patient/dashboard"
+  );
+}, 300);
   }
 } catch (err) {
   alert(err.message);

@@ -1,6 +1,11 @@
-import DashboardLayout from "../../components/dashboard/DashboardLayout";
-import useProfile from "../../hooks/useProfile";
-import DashboardCard from "../../components/dashboard/DashboardCard";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+
+import DashboardLayout from "../components/dashboard/DashboardLayout";
+import DashboardCard from "../components/dashboard/DashboardCard";
+import useProfile from "../hooks/useProfile";
+
 import {
   FaCalendarCheck,
   FaUserInjured,
@@ -9,9 +14,53 @@ import {
 
 function DoctorDashboard() {
   const { profile, loading } = useProfile("doctor");
+  const navigate = useNavigate();
+
+  const [appointmentCount, setAppointmentCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [patientCount, setPatientCount] = useState(0);
+
+  useEffect(() => {
+    if (profile) {
+      fetchCounts();
+    }
+  }, [profile]);
+
+  async function fetchCounts() {
+    const { count: appointments } = await supabase
+      .from("appointments")
+      .select("*", { count: "exact", head: true })
+      .eq("doctor_id", profile.id);
+
+    const { count: pending } = await supabase
+      .from("appointments")
+      .select("*", { count: "exact", head: true })
+      .eq("doctor_id", profile.id)
+      .eq("status", "Pending");
+
+    const { data: patientData } = await supabase
+      .from("appointments")
+      .select("patient_id")
+      .eq("doctor_id", profile.id);
+
+    if (patientData) {
+      const uniquePatients = [
+        ...new Set(patientData.map((item) => item.patient_id)),
+      ];
+
+      setPatientCount(uniquePatients.length);
+    }
+
+    setAppointmentCount(appointments || 0);
+    setPendingCount(pending || 0);
+  }
 
   if (loading) {
-    return <h2>Loading...</h2>;
+    return (
+      <DashboardLayout>
+        <h2>Loading Dashboard...</h2>
+      </DashboardLayout>
+    );
   }
 
   return (
@@ -21,26 +70,36 @@ function DoctorDashboard() {
       <div className="dashboard-cards">
         <DashboardCard
           title="Appointments"
-          value="0"
+          value={appointmentCount}
           icon={<FaCalendarCheck />}
         />
 
         <DashboardCard
           title="Patients"
-          value="0"
+          value={patientCount}
           icon={<FaUserInjured />}
         />
 
         <DashboardCard
           title="Pending"
-          value="0"
+          value={pendingCount}
           icon={<FaClock />}
         />
       </div>
 
       <div className="profile-card">
+        <h3>Profile Information</h3>
+
+        <p><strong>Name:</strong> {profile?.full_name}</p>
         <p><strong>Email:</strong> {profile?.email}</p>
         <p><strong>Specialty:</strong> {profile?.specialty}</p>
+
+        <button
+          className="book-btn"
+          onClick={() => navigate("/doctor/profile")}
+        >
+          Edit Profile
+        </button>
       </div>
     </DashboardLayout>
   );
