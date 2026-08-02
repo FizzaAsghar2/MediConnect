@@ -6,6 +6,8 @@ import useProfile from "../../hooks/useProfile";
 function DoctorProfile() {
   const { profile, loading } = useProfile("doctor");
 
+  const [saving, setSaving] = useState(false);
+
   const [formData, setFormData] = useState({
     full_name: "",
     specialty: "",
@@ -32,19 +34,36 @@ function DoctorProfile() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const { error } = await supabase
-      .from("doctors")
-      .update(formData)
-      .eq("id", profile.id);
+  console.log("Profile:", profile);
+  console.log("FormData:", formData);
 
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Profile Updated Successfully!");
-    }
+  setSaving(true);
+
+  const { data, error } = await supabase
+    .from("doctors")
+    .update({
+      full_name: formData.full_name,
+      specialty: formData.specialty,
+      experience: formData.experience,
+      email: formData.email,
+    })
+    .eq("id", profile.id)
+    .select();
+
+  setSaving(false);
+
+  console.log("Updated Data:", data);
+  console.log("Error:", error);
+
+  if (error) {
+    alert(error.message);
+    return;
   }
+
+  alert("Profile Updated Successfully!");
+}
 
   if (loading) {
     return (
@@ -64,40 +83,44 @@ function DoctorProfile() {
             className="search-input"
             type="text"
             name="full_name"
-            placeholder="Full Name"
             value={formData.full_name}
             onChange={handleChange}
+            placeholder="Full Name"
           />
 
           <input
             className="search-input"
             type="text"
             name="specialty"
-            placeholder="Specialty"
             value={formData.specialty}
             onChange={handleChange}
+            placeholder="Specialty"
           />
 
           <input
             className="search-input"
             type="text"
             name="experience"
-            placeholder="Experience"
             value={formData.experience}
             onChange={handleChange}
+            placeholder="Experience"
           />
 
           <input
             className="search-input"
             type="email"
             name="email"
-            placeholder="Email"
             value={formData.email}
             onChange={handleChange}
+            placeholder="Email"
           />
 
-          <button className="book-btn" type="submit">
-            Save Changes
+          <button
+            className="book-btn"
+            type="submit"
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </form>
       </div>

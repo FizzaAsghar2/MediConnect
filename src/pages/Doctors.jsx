@@ -9,6 +9,25 @@ function Doctors() {
 
   useEffect(() => {
     fetchDoctors();
+
+    const channel = supabase
+      .channel("doctor-updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "doctors",
+        },
+        () => {
+          fetchDoctors();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   async function fetchDoctors() {
@@ -16,7 +35,8 @@ function Doctors() {
 
     const { data, error } = await supabase
       .from("doctors")
-      .select("*");
+      .select("*")
+      .order("full_name");
 
     if (error) {
       console.error(error);
@@ -50,19 +70,20 @@ function Doctors() {
                 <h3>{doctor.full_name}</h3>
 
                 <p>
-                  <strong>Specialty:</strong> {doctor.specialty}
+                  <strong>Specialty:</strong> {doctor.specialty || "Not Added"}
                 </p>
 
                 <p>
-                  <strong>Experience:</strong> {doctor.experience}
+                  <strong>Experience:</strong>{" "}
+                  {doctor.experience || "Not Added"}
                 </p>
 
-               <Link
-  to="/book-appointment"
-  state={{ doctor }}
->
-  <button>Book Appointment</button>
-</Link>
+                <Link
+                  to="/book-appointment"
+                  state={{ doctor }}
+                >
+                  <button>Book Appointment</button>
+                </Link>
               </div>
             ))}
           </div>
