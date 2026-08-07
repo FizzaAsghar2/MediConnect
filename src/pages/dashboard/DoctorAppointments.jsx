@@ -5,7 +5,9 @@ import useProfile from "../../hooks/useProfile";
 
 function DoctorAppointments() {
   const { profile, loading } = useProfile("doctor");
+
   const [appointments, setAppointments] = useState([]);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -18,8 +20,9 @@ function DoctorAppointments() {
       .from("appointments")
       .select(`
         *,
-        patients (
-          full_name
+        patients(
+          full_name,
+          email
         )
       `)
       .eq("doctor_id", profile.id)
@@ -31,10 +34,19 @@ function DoctorAppointments() {
   }
 
   async function updateStatus(id, status) {
-    await supabase
+    setProcessing(true);
+
+    const { error } = await supabase
       .from("appointments")
       .update({ status })
       .eq("id", id);
+
+    setProcessing(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
     fetchAppointments();
   }
@@ -56,22 +68,30 @@ function DoctorAppointments() {
       ) : (
         appointments.map((appointment) => (
           <div key={appointment.id} className="profile-card">
-            <p>
-              <strong>Patient:</strong>{" "}
+            <h3>
               {appointment.patients?.full_name || "Unknown Patient"}
+            </h3>
+
+            <p>
+              <strong>Email:</strong>{" "}
+              {appointment.patients?.email || "Not Available"}
             </p>
 
             <p>
-              <strong>Date:</strong> {appointment.appointment_date}
+              <strong>Date:</strong>{" "}
+              {appointment.appointment_date}
             </p>
 
             <p>
-              <strong>Time:</strong> {appointment.appointment_time}
+              <strong>Time:</strong>{" "}
+              {appointment.appointment_time}
             </p>
 
             <p>
               <strong>Status:</strong>{" "}
-              <span className={`status ${appointment.status.toLowerCase()}`}>
+              <span
+                className={`status ${appointment.status.toLowerCase()}`}
+              >
                 {appointment.status}
               </span>
             </p>
@@ -86,8 +106,12 @@ function DoctorAppointments() {
               >
                 <button
                   className="book-btn"
+                  disabled={processing}
                   onClick={() =>
-                    updateStatus(appointment.id, "Approved")
+                    updateStatus(
+                      appointment.id,
+                      "Approved"
+                    )
                   }
                 >
                   Approve
@@ -95,9 +119,15 @@ function DoctorAppointments() {
 
                 <button
                   className="book-btn"
-                  style={{ background: "#dc3545" }}
+                  disabled={processing}
+                  style={{
+                    background: "#dc3545",
+                  }}
                   onClick={() =>
-                    updateStatus(appointment.id, "Cancelled")
+                    updateStatus(
+                      appointment.id,
+                      "Cancelled"
+                    )
                   }
                 >
                   Cancel

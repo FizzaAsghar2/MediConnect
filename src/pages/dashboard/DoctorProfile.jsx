@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../supabaseClient";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import useProfile from "../../hooks/useProfile";
 
@@ -13,6 +13,10 @@ function DoctorProfile() {
     specialty: "",
     experience: "",
     email: "",
+    availability: true,
+    available_days: "",
+    start_time: "",
+    end_time: "",
   });
 
   useEffect(() => {
@@ -22,48 +26,54 @@ function DoctorProfile() {
         specialty: profile.specialty || "",
         experience: profile.experience || "",
         email: profile.email || "",
+        availability:
+          profile.availability === null
+            ? true
+            : profile.availability,
+        available_days: profile.available_days || "",
+        start_time: profile.start_time || "",
+        end_time: profile.end_time || "",
       });
     }
   }, [profile]);
 
   function handleChange(e) {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value, type, checked } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   }
 
   async function handleSubmit(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  console.log("Profile:", profile);
-  console.log("FormData:", formData);
+    setSaving(true);
 
-  setSaving(true);
+    const { error } = await supabase
+      .from("doctors")
+      .update({
+        full_name: formData.full_name,
+        specialty: formData.specialty,
+        experience: formData.experience,
+        email: formData.email,
+        availability: formData.availability,
+        available_days: formData.available_days,
+        start_time: formData.start_time,
+        end_time: formData.end_time,
+      })
+      .eq("id", profile.id);
 
-  const { data, error } = await supabase
-    .from("doctors")
-    .update({
-      full_name: formData.full_name,
-      specialty: formData.specialty,
-      experience: formData.experience,
-      email: formData.email,
-    })
-    .eq("id", profile.id)
-    .select();
+    setSaving(false);
 
-  setSaving(false);
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
-  console.log("Updated Data:", data);
-  console.log("Error:", error);
-
-  if (error) {
-    alert(error.message);
-    return;
+    alert("Profile & Availability Updated Successfully!");
   }
-
-  alert("Profile Updated Successfully!");
-}
 
   if (loading) {
     return (
@@ -76,7 +86,7 @@ function DoctorProfile() {
   return (
     <DashboardLayout>
       <div className="profile-card">
-        <h2>Edit Profile</h2>
+        <h3>Edit Profile</h3>
 
         <form onSubmit={handleSubmit}>
           <input
@@ -113,6 +123,56 @@ function DoctorProfile() {
             value={formData.email}
             onChange={handleChange}
             placeholder="Email"
+          />
+
+          <hr style={{ margin: "25px 0" }} />
+
+          <h3>Availability Settings</h3>
+
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "20px",
+            }}
+          >
+            <input
+              type="checkbox"
+              name="availability"
+              checked={formData.availability}
+              onChange={handleChange}
+            />
+            Available for Appointments
+          </label>
+
+          <input
+            className="search-input"
+            type="text"
+            name="available_days"
+            value={formData.available_days}
+            onChange={handleChange}
+            placeholder="Example: Monday,Tuesday,Wednesday"
+          />
+
+          <label>Start Time</label>
+
+          <input
+            className="search-input"
+            type="time"
+            name="start_time"
+            value={formData.start_time}
+            onChange={handleChange}
+          />
+
+          <label>End Time</label>
+
+          <input
+            className="search-input"
+            type="time"
+            name="end_time"
+            value={formData.end_time}
+            onChange={handleChange}
           />
 
           <button

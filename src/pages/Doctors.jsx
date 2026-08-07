@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../supabaseClient";
@@ -15,7 +16,7 @@ function Doctors() {
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "doctors",
         },
@@ -39,7 +40,7 @@ function Doctors() {
       .order("full_name");
 
     if (error) {
-      console.error(error);
+      console.log(error);
       setDoctors([]);
     } else {
       setDoctors(data);
@@ -52,25 +53,36 @@ function Doctors() {
     <div className="doctors-page">
       <div className="container">
         <h1>Our Doctors</h1>
-        <p>Choose a doctor according to your healthcare needs.</p>
+
+        <p>
+          Choose a doctor according to your healthcare
+          needs.
+        </p>
 
         {loading ? (
-          <h2>Loading doctors...</h2>
+          <h2>Loading...</h2>
         ) : doctors.length === 0 ? (
-          <h2>No doctors available.</h2>
+          <h2>No Doctors Found</h2>
         ) : (
           <div className="doctor-grid">
             {doctors.map((doctor) => (
-              <div className="doctor-card" key={doctor.id}>
+              <div
+                className="doctor-card"
+                key={doctor.id}
+              >
                 <img
-                  src={doctor.image || "https://via.placeholder.com/150"}
+                  src={
+                    doctor.image ||
+                    "https://via.placeholder.com/150"
+                  }
                   alt={doctor.full_name}
                 />
 
                 <h3>{doctor.full_name}</h3>
 
                 <p>
-                  <strong>Specialty:</strong> {doctor.specialty || "Not Added"}
+                  <strong>Specialty:</strong>{" "}
+                  {doctor.specialty || "Not Added"}
                 </p>
 
                 <p>
@@ -78,12 +90,45 @@ function Doctors() {
                   {doctor.experience || "Not Added"}
                 </p>
 
-                <Link
-                  to="/book-appointment"
-                  state={{ doctor }}
-                >
-                  <button>Book Appointment</button>
-                </Link>
+                <p>
+                  <strong>Available:</strong>{" "}
+                  {doctor.availability
+                    ? "Yes"
+                    : "No"}
+                </p>
+
+                <p>
+                  <strong>Working Days:</strong>{" "}
+                  {doctor.available_days ||
+                    "Not Added"}
+                </p>
+
+                <p>
+                  <strong>Working Hours:</strong>{" "}
+                  {doctor.start_time} -{" "}
+                  {doctor.end_time}
+                </p>
+
+                {doctor.availability ? (
+                  <Link
+                    to="/book-appointment"
+                    state={{ doctor }}
+                  >
+                    <button>
+                      Book Appointment
+                    </button>
+                  </Link>
+                ) : (
+                  <button
+                    disabled
+                    style={{
+                      background: "#999",
+                      cursor: "not-allowed",
+                    }}
+                  >
+                    Not Available
+                  </button>
+                )}
               </div>
             ))}
           </div>

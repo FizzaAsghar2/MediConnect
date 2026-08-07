@@ -1,13 +1,15 @@
+
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import DashboardCard from "../../components/dashboard/DashboardCard";
 import useProfile from "../../hooks/useProfile";
-import { supabase } from "../../supabaseClient";
+import { supabase } from "../../lib/supabase";
 
 import {
   FaCalendarCheck,
   FaUserMd,
   FaClock,
+  FaCheckCircle,
 } from "react-icons/fa";
 
 function PatientDashboard() {
@@ -15,6 +17,7 @@ function PatientDashboard() {
 
   const [appointments, setAppointments] = useState([]);
   const [doctorCount, setDoctorCount] = useState(0);
+  const [nextAppointment, setNextAppointment] = useState(null);
 
   useEffect(() => {
     if (profile) {
@@ -26,26 +29,35 @@ function PatientDashboard() {
   async function fetchAppointments() {
     const { data } = await supabase
       .from("appointments")
-      .select(
-        `
+      .select(`
         *,
-        doctors (
-          full_name
+        doctors(
+          full_name,
+          specialty
         )
-      `
-      )
+      `)
       .eq("patient_id", profile.id)
       .order("appointment_date", { ascending: true });
 
     if (data) {
       setAppointments(data);
+
+      const upcoming = data.find(
+        (item) =>
+          item.status !== "Cancelled"
+      );
+
+      setNextAppointment(upcoming || null);
     }
   }
 
   async function fetchDoctors() {
     const { count } = await supabase
       .from("doctors")
-      .select("*", { count: "exact", head: true });
+      .select("*", {
+        count: "exact",
+        head: true,
+      });
 
     setDoctorCount(count || 0);
   }
@@ -60,7 +72,9 @@ function PatientDashboard() {
 
   return (
     <DashboardLayout>
-      <h1>Welcome, {profile?.full_name}</h1>
+      <h2>
+        Welcome, {profile?.full_name}
+      </h2>
 
       <div className="dashboard-cards">
         <DashboardCard
@@ -77,8 +91,22 @@ function PatientDashboard() {
 
         <DashboardCard
           title="Pending"
-          value={appointments.filter((a) => a.status === "Pending").length}
+          value={
+            appointments.filter(
+              (a) => a.status === "Pending"
+            ).length
+          }
           icon={<FaClock />}
+        />
+
+        <DashboardCard
+          title="Approved"
+          value={
+            appointments.filter(
+              (a) => a.status === "Approved"
+            ).length
+          }
+          icon={<FaCheckCircle />}
         />
       </div>
 
@@ -92,7 +120,43 @@ function PatientDashboard() {
       </div>
 
       <div className="profile-card">
-        <h3>My Appointments</h3>
+        <h3>Next Appointment</h3>
+
+        {nextAppointment ? (
+          <>
+            <p>
+              <strong>Doctor:</strong>{" "}
+              {nextAppointment.doctors?.full_name}
+            </p>
+
+            <p>
+              <strong>Specialty:</strong>{" "}
+              {nextAppointment.doctors?.specialty}
+            </p>
+
+            <p>
+              <strong>Date:</strong>{" "}
+              {nextAppointment.appointment_date}
+            </p>
+
+            <p>
+              <strong>Time:</strong>{" "}
+              {nextAppointment.appointment_time}
+            </p>
+
+            <span
+              className={`status ${nextAppointment.status.toLowerCase()}`}
+            >
+              {nextAppointment.status}
+            </span>
+          </>
+        ) : (
+          <p>No upcoming appointments.</p>
+        )}
+      </div>
+
+      <div className="profile-card">
+        <h3>Recent Appointments</h3>
 
         {appointments.length === 0 ? (
           <p>No appointments found.</p>
@@ -111,12 +175,16 @@ function PatientDashboard() {
               {appointments.map((appointment) => (
                 <tr key={appointment.id}>
                   <td>
-                    {appointment.doctors?.full_name || "Unknown Doctor"}
+                    {appointment.doctors?.full_name}
                   </td>
 
-                  <td>{appointment.appointment_date}</td>
+                  <td>
+                    {appointment.appointment_date}
+                  </td>
 
-                  <td>{appointment.appointment_time}</td>
+                  <td>
+                    {appointment.appointment_time}
+                  </td>
 
                   <td>
                     <span
