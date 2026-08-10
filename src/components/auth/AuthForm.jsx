@@ -1,198 +1,282 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaEnvelope, FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
-import { useAuth } from "../../context/AuthContext";
 
-const AuthForm = ({ isLoginInitial = true }) => {
-  const [isLogin, setIsLogin] = useState(isLoginInitial);
-  const [role, setRole] = useState('patient'); // 'patient' | 'doctor'
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [specialization, setSpecialization] = useState('');
-  const [error, setError] = useState('');
+const AuthForm = ({
+  role = "patient",
+  isRegister = false,
+}) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [specialization, setSpecialization] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { fetchUserProfile } = useAuth();
 
   const handleAuth = async (e) => {
     e.preventDefault();
-    setError('');
+
+    setError("");
     setLoading(true);
 
     try {
-      if (isLogin) {
-        // --- LOGIN FLOW ---
-        const { data, error: loginError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      if (!isRegister) {
+        /* ================= LOGIN ================= */
 
-        if (loginError) throw loginError;
+        const { data, error: loginError } =
+          await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
 
-        await fetchUserProfile(data.user);
-        navigate('/dashboard');
-      } else {
-        // --- REGISTRATION FLOW ---
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { role, name },
-          },
-        });
-
-        if (signUpError) throw signUpError;
-
-        const userId = data.user?.id;
-        if (!userId) throw new Error('Failed to retrieve signed up user ID.');
-
-        if (role === 'patient') {
-          const { error: patientInsertError } = await supabase.from('patients').insert([
-            {
-              id: userId,
-              name,
-              email,
-              phone: phone || null,
-            },
-          ]);
-          if (patientInsertError) throw patientInsertError;
-        } else if (role === 'doctor') {
-          const { error: doctorInsertError } = await supabase.from('doctors').insert([
-            {
-              id: userId,
-              name,
-              email,
-              specialization: specialization || 'General Physician',
-            },
-          ]);
-          if (doctorInsertError) throw doctorInsertError;
+        if (loginError) {
+          throw loginError;
         }
 
-        await fetchUserProfile(data.user);
-        navigate('/dashboard');
+        if (role === "doctor") {
+          navigate("/doctor/dashboard");
+        } else {
+          navigate("/patient/dashboard");
+        }
+
+        return;
+      }
+
+      /* ================= REGISTER ================= */
+
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            role,
+            full_name: name,
+          },
+        },
+      });
+
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      const userId = data.user?.id;
+
+      if (!userId) {
+        throw new Error("Unable to create account.");
+      }
+
+      if (role === "patient") {
+        const { error: patientError } = await supabase
+          .from("patients")
+          .insert([
+            {
+              id: userId,
+              full_name: name,
+              email,
+            },
+          ]);
+
+        if (patientError) {
+          throw patientError;
+        }
+      }
+
+      if (role === "doctor") {
+        const { error: doctorError } = await supabase
+          .from("doctors")
+          .insert([
+            {
+              id: userId,
+              full_name: name,
+              email,
+              specialty: specialization || "General Physician",
+            },
+          ]);
+
+        if (doctorError) {
+          throw doctorError;
+        }
+      }
+
+      /*
+       * Registration is complete.
+       * Do NOT send the user directly to the dashboard.
+       * Sign them out and send them to the correct login page.
+       */
+
+      await supabase.auth.signOut();
+
+      if (role === "doctor") {
+        navigate("/doctor/login", {
+          state: {
+            message: "Registration successful. Please login to continue.",
+          },
+        });
+      } else {
+        navigate("/patient/login", {
+          state: {
+            message: "Registration successful. Please login to continue.",
+          },
+        });
       }
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred.');
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50 px-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-md border border-gray-100">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          {isLogin ? 'Login to MediConnect' : 'Create an Account'}
-        </h2>
+    <div className="auth-form">
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
-            {error}
+      {error && (
+        <div className="auth-error">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleAuth}>
+
+        {/* Full Name */}
+        {isRegister && (
+          <div className="input-group">
+            <label>Full Name</label>
+
+            <div className="input-wrapper">
+              <FaUser className="input-icon" />
+
+              <input
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
           </div>
         )}
 
-        <form onSubmit={handleAuth} className="space-y-4">
-          {!isLogin && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Account Type</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-gray-800"
-                >
-                  <option value="patient">Patient</option>
-                  <option value="doctor">Doctor</option>
-                </select>
-              </div>
+        {/* Doctor Specialization */}
+        {isRegister && role === "doctor" && (
+          <div className="input-group">
+            <label>Specialization</label>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
-                />
-              </div>
+            <div className="input-wrapper">
+              <input
+                type="text"
+                placeholder="e.g. Cardiology"
+                value={specialization}
+                onChange={(e) => setSpecialization(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+        )}
 
-              {role === 'patient' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
-                  />
-                </div>
-              )}
+        {/* Email */}
+        <div className="input-group">
+          <label>Email Address</label>
 
-              {role === 'doctor' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Specialization</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Cardiology"
-                    value={specialization}
-                    onChange={(e) => setSpecialization(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
-                  />
-                </div>
-              )}
-            </>
-          )}
+          <div className="input-wrapper">
+            <FaEnvelope className="input-icon" />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email Address</label>
             <input
               type="email"
-              required
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
+              required
             />
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+        {/* Password */}
+        <div className="input-group">
+          <label>Password</label>
+
+          <div className="input-wrapper">
+            <FaLock className="input-icon" />
+
             <input
-              type="password"
-              required
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
+              minLength={6}
+              required
             />
+
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label="Toggle password visibility"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:opacity-50 font-medium"
-          >
-            {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Sign Up'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError('');
-            }}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
-          </button>
         </div>
+
+        {/* Submit */}
+        <button
+          type="submit"
+          className="auth-btn"
+          disabled={loading}
+        >
+          {loading
+            ? "Processing..."
+            : isRegister
+            ? "Create Account"
+            : "Login"}
+        </button>
+
+      </form>
+
+      {/* Switch */}
+      <div className="auth-switch">
+        {isRegister ? (
+          <>
+            Already have an account?{" "}
+            <button
+              type="button"
+              onClick={() =>
+                navigate(
+                  role === "doctor"
+                    ? "/doctor/login"
+                    : "/patient/login"
+                )
+              }
+            >
+              Login
+            </button>
+          </>
+        ) : (
+          <>
+            Don't have an account?{" "}
+            <button
+              type="button"
+              onClick={() =>
+                navigate(
+                  role === "doctor"
+                    ? "/doctor/register"
+                    : "/patient/register"
+                )
+              }
+            >
+              Create Account
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
 };
 
 export default AuthForm;
+

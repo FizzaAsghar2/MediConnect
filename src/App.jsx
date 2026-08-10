@@ -37,9 +37,9 @@ function Home() {
 function App() {
   return (
     <Routes>
+      {/* Public Pages */}
       <Route path="/" element={<Home />} />
 
-      {/* Public Pages */}
       <Route path="/doctors" element={<Doctors />} />
       <Route path="/book-appointment" element={<BookAppointment />} />
 

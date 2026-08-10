@@ -5,7 +5,54 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const fetchUserProfile = async (currentUser) => {
+    if (!currentUser) {
+      setProfile(null);
+      setRole(null);
+      return null;
+    }
+
+    const { data: doctor } = await supabase
+      .from("doctors")
+      .select("*")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+    if (doctor) {
+      setProfile(doctor);
+      setRole("doctor");
+
+      return {
+        profile: doctor,
+        role: "doctor",
+      };
+    }
+
+    const { data: patient } = await supabase
+      .from("patients")
+      .select("*")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+    if (patient) {
+      setProfile(patient);
+      setRole("patient");
+
+      return {
+        profile: patient,
+        role: "patient",
+      };
+    }
+
+    setProfile(null);
+    setRole(null);
+
+    return null;
+  };
 
   useEffect(() => {
     const getSession = async () => {
@@ -13,7 +60,14 @@ export function AuthProvider({ children }) {
         data: { session },
       } = await supabase.auth.getSession();
 
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+
+      setUser(currentUser);
+
+      if (currentUser) {
+        await fetchUserProfile(currentUser);
+      }
+
       setLoading(false);
     };
 
@@ -21,15 +75,36 @@ export function AuthProvider({ children }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const currentUser = session?.user ?? null;
+
+      setUser(currentUser);
+
+      if (currentUser) {
+        await fetchUserProfile(currentUser);
+      } else {
+        setProfile(null);
+        setRole(null);
+      }
+
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        role,
+        loading,
+        fetchUserProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
