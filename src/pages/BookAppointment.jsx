@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
@@ -68,46 +67,125 @@ function BookAppointment() {
     setLoading(true);
 
     try {
-      const { data: existingAppointment } = await supabase
-        .from("appointments")
-        .select("id")
-        .eq("doctor_id", doctor.id)
-        .eq("appointment_date", appointmentDate)
-        .eq("appointment_time", appointmentTime)
-        .maybeSingle();
+      /* ===============================
+         STEP 1: CHECK PATIENT PROFILE
+         =============================== */
+
+      const { data: patient, error: patientError } =
+        await supabase
+          .from("patients")
+          .select("id")
+          .eq("id", user.id)
+          .maybeSingle();
+
+      if (patientError) {
+        console.error("Patient check error:", patientError);
+        alert("Could not check patient profile: " + patientError.message);
+        return;
+      }
+
+      /* ===============================
+         STEP 2: CREATE PATIENT PROFILE
+         IF IT DOES NOT EXIST
+         =============================== */
+
+      if (!patient) {
+        const { error: createPatientError } =
+          await supabase
+            .from("patients")
+            .insert({
+              id: user.id,
+              full_name:
+                user.user_metadata?.full_name ||
+                user.email?.split("@")[0] ||
+                "Patient",
+              email: user.email,
+            });
+
+        if (createPatientError) {
+          console.error(
+            "Patient creation error:",
+            createPatientError
+          );
+
+          alert(
+            "Patient profile error: " +
+              createPatientError.message
+          );
+
+          return;
+        }
+      }
+
+      /* ===============================
+         STEP 3: CHECK DUPLICATE BOOKING
+         =============================== */
+
+      const { data: existingAppointment, error: duplicateError } =
+        await supabase
+          .from("appointments")
+          .select("id")
+          .eq("doctor_id", doctor.id)
+          .eq("appointment_date", appointmentDate)
+          .eq("appointment_time", appointmentTime)
+          .maybeSingle();
+
+      if (duplicateError) {
+        console.error(
+          "Duplicate check error:",
+          duplicateError
+        );
+
+        alert(duplicateError.message);
+        return;
+      }
 
       if (existingAppointment) {
-        setLoading(false);
         alert("This time slot is already booked.");
         return;
       }
 
-      const { error } = await supabase
-        .from("appointments")
-        .insert([
-          {
+      /* ===============================
+         STEP 4: BOOK APPOINTMENT
+         =============================== */
+
+      const { error: appointmentError } =
+        await supabase
+          .from("appointments")
+          .insert({
             patient_id: user.id,
             doctor_id: doctor.id,
             appointment_date: appointmentDate,
             appointment_time: appointmentTime,
             status: "Pending",
-          },
-        ]);
+          });
 
-      setLoading(false);
+      if (appointmentError) {
+        console.error(
+          "Appointment booking error:",
+          appointmentError
+        );
 
-      if (error) {
-        alert(error.message);
+        alert(
+          "Booking failed: " +
+            appointmentError.message
+        );
+
         return;
       }
 
-      alert("Appointment booked successfully.");
+      alert("Appointment booked successfully!");
 
       navigate("/patient/dashboard");
-    } catch (err) {
-      console.error(err);
+
+    } catch (error) {
+      console.error("Booking error:", error);
+      alert(
+        error.message ||
+          "Something went wrong while booking."
+      );
+    } finally {
       setLoading(false);
-      alert("Something went wrong.");
     }
   };
 

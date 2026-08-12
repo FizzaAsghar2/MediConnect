@@ -1,10 +1,11 @@
+
 import { useEffect, useState } from "react";
-import { supabase } from "../../supabaseClient";
+import { supabase } from "../../lib/supabase";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import useProfile from "../../hooks/useProfile";
 
 function DoctorProfile() {
-  const { profile, loading } = useProfile("doctor");
+  const { profile, loading, refreshProfile } = useProfile("doctor");
 
   const [saving, setSaving] = useState(false);
 
@@ -49,36 +50,62 @@ function DoctorProfile() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    setSaving(true);
-
-    const { error } = await supabase
-      .from("doctors")
-      .update({
-        full_name: formData.full_name,
-        specialty: formData.specialty,
-        experience: formData.experience,
-        email: formData.email,
-        availability: formData.availability,
-        available_days: formData.available_days,
-        start_time: formData.start_time,
-        end_time: formData.end_time,
-      })
-      .eq("id", profile.id);
-
-    setSaving(false);
-
-    if (error) {
-      alert(error.message);
+    if (!profile?.id) {
+      alert("Doctor profile not found. Please login again.");
       return;
     }
 
-    alert("Profile & Availability Updated Successfully!");
+    setSaving(true);
+
+    try {
+      const { error } = await supabase
+        .from("doctors")
+        .update({
+          full_name: formData.full_name,
+          specialty: formData.specialty,
+          experience: formData.experience,
+          email: formData.email,
+          availability: formData.availability,
+          available_days: formData.available_days,
+          start_time: formData.start_time,
+          end_time: formData.end_time,
+        })
+        .eq("id", profile.id);
+
+      if (error) {
+        console.error("Update error:", error);
+        alert(error.message);
+        return;
+      }
+
+      await refreshProfile();
+
+      alert("Profile & Availability Updated Successfully!");
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert(error.message || "Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loading) {
     return (
       <DashboardLayout>
         <h2>Loading...</h2>
+      </DashboardLayout>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <DashboardLayout>
+        <div className="profile-card">
+          <h3>Doctor Profile Not Found</h3>
+          <p>
+            Your doctor profile could not be loaded. Please login again.
+          </p>
+        </div>
       </DashboardLayout>
     );
   }
@@ -143,6 +170,7 @@ function DoctorProfile() {
               checked={formData.availability}
               onChange={handleChange}
             />
+
             Available for Appointments
           </label>
 
@@ -189,3 +217,4 @@ function DoctorProfile() {
 }
 
 export default DoctorProfile;
+

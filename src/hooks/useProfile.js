@@ -9,28 +9,41 @@ function useProfile(role) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      fetchProfile();
+    if (!user) {
+      setProfile(null);
+      setLoading(false);
+      return;
     }
-  }, [user]);
+
+    fetchProfile();
+  }, [user, role]);
 
   async function fetchProfile() {
-    const table =
-      role === "doctor"
-        ? "doctors"
-        : "patients";
+    setLoading(true);
 
-    const { data } = await supabase
+    const table = role === "doctor" ? "doctors" : "patients";
+
+    const { data, error } = await supabase
       .from(table)
       .select("*")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
-    setProfile(data);
+    if (error) {
+      console.error("Profile fetch error:", error);
+      setProfile(null);
+    } else {
+      setProfile(data);
+    }
+
     setLoading(false);
   }
 
-  return { profile, loading };
+  return {
+    profile,
+    loading,
+    refreshProfile: fetchProfile,
+  };
 }
 
 export default useProfile;

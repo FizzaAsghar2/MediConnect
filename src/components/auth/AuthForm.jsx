@@ -87,21 +87,20 @@ const AuthForm = ({
         }
       }
 
-      if (role === "doctor") {
-        const { error: doctorError } = await supabase
-          .from("doctors")
-          .insert([
-            {
-              id: userId,
-              full_name: name,
-              email,
-              specialty: specialization || "General Physician",
-            },
-          ]);
+      if (role === 'doctor') {
+  const { error: doctorInsertError } = await supabase
+    .from("doctors")
+    .insert([
+      {
+        id: userId,
+        full_name: name,
+        email,
+        specialty: specialization || "General Physician",
+      },
+    ]);
 
-        if (doctorError) {
-          throw doctorError;
-        }
+  if (doctorInsertError) throw doctorInsertError;
+
       }
 
       /*

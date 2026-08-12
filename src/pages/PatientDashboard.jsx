@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import useProfile from "../../hooks/useProfile";
 import DashboardCard from "../../components/dashboard/DashboardCard";
-import { supabase } from "../../supabaseClient";
+import { supabase } from "../../lib/supabase";
 import {
   FaCalendarCheck,
   FaUserMd,
