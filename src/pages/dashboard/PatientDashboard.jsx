@@ -1,15 +1,12 @@
-
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
-import DashboardCard from "../../components/dashboard/DashboardCard";
 import useProfile from "../../hooks/useProfile";
+import DashboardCard from "../../components/dashboard/DashboardCard";
 import { supabase } from "../../lib/supabase";
-
 import {
   FaCalendarCheck,
   FaUserMd,
   FaClock,
-  FaCheckCircle,
 } from "react-icons/fa";
 
 function PatientDashboard() {
@@ -17,47 +14,42 @@ function PatientDashboard() {
 
   const [appointments, setAppointments] = useState([]);
   const [doctorCount, setDoctorCount] = useState(0);
-  const [nextAppointment, setNextAppointment] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (profile) {
+    if (profile?.id) {
       fetchAppointments();
       fetchDoctors();
     }
   }, [profile]);
 
   async function fetchAppointments() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("appointments")
-      .select(`
-        *,
-        doctors(
-          full_name,
-          specialty
-        )
-      `)
-      .eq("patient_id", profile.id)
-      .order("appointment_date", { ascending: true });
+      .select("*")
+      .eq("patient_id", profile.id);
 
-    if (data) {
-      setAppointments(data);
-
-      const upcoming = data.find(
-        (item) =>
-          item.status !== "Cancelled"
-      );
-
-      setNextAppointment(upcoming || null);
+    if (error) {
+      console.error("Appointments error:", error);
+      setError(error.message);
+      return;
     }
+
+    setAppointments(data || []);
   }
 
   async function fetchDoctors() {
-    const { count } = await supabase
+    const { count, error } = await supabase
       .from("doctors")
       .select("*", {
         count: "exact",
         head: true,
       });
+
+    if (error) {
+      console.error("Doctors count error:", error);
+      return;
+    }
 
     setDoctorCount(count || 0);
   }
@@ -65,16 +57,36 @@ function PatientDashboard() {
   if (loading) {
     return (
       <DashboardLayout>
-        <h2>Loading Dashboard...</h2>
+        <h2>Loading patient dashboard...</h2>
       </DashboardLayout>
     );
   }
 
+  if (!profile) {
+    return (
+      <DashboardLayout>
+        <h2>Patient profile not found.</h2>
+        <p>
+          Your Supabase Auth account exists, but no matching
+          record was found in the patients table.
+        </p>
+      </DashboardLayout>
+    );
+  }
+
+  const pendingCount = appointments.filter(
+    (item) => item.status === "Pending"
+  ).length;
+
   return (
     <DashboardLayout>
-      <h2>
-        Welcome, {profile?.full_name}
-      </h2>
+      <h1>Welcome, {profile.full_name || "Patient"}</h1>
+
+      {error && (
+        <p style={{ color: "red" }}>
+          {error}
+        </p>
+      )}
 
       <div className="dashboard-cards">
         <DashboardCard
@@ -91,113 +103,26 @@ function PatientDashboard() {
 
         <DashboardCard
           title="Pending"
-          value={
-            appointments.filter(
-              (a) => a.status === "Pending"
-            ).length
-          }
+          value={pendingCount}
           icon={<FaClock />}
         />
-
-        <DashboardCard
-          title="Approved"
-          value={
-            appointments.filter(
-              (a) => a.status === "Approved"
-            ).length
-          }
-          icon={<FaCheckCircle />}
-        />
       </div>
 
       <div className="profile-card">
-        <h3>Profile Information</h3>
+        <p>
+          <strong>Email:</strong>{" "}
+          {profile.email || "Not available"}
+        </p>
 
-        <p><strong>Name:</strong> {profile?.full_name}</p>
-        <p><strong>Email:</strong> {profile?.email}</p>
-        <p><strong>Age:</strong> {profile?.age}</p>
-        <p><strong>Gender:</strong> {profile?.gender}</p>
-      </div>
+        <p>
+          <strong>Age:</strong>{" "}
+          {profile.age || "Not added"}
+        </p>
 
-      <div className="profile-card">
-        <h3>Next Appointment</h3>
-
-        {nextAppointment ? (
-          <>
-            <p>
-              <strong>Doctor:</strong>{" "}
-              {nextAppointment.doctors?.full_name}
-            </p>
-
-            <p>
-              <strong>Specialty:</strong>{" "}
-              {nextAppointment.doctors?.specialty}
-            </p>
-
-            <p>
-              <strong>Date:</strong>{" "}
-              {nextAppointment.appointment_date}
-            </p>
-
-            <p>
-              <strong>Time:</strong>{" "}
-              {nextAppointment.appointment_time}
-            </p>
-
-            <span
-              className={`status ${nextAppointment.status.toLowerCase()}`}
-            >
-              {nextAppointment.status}
-            </span>
-          </>
-        ) : (
-          <p>No upcoming appointments.</p>
-        )}
-      </div>
-
-      <div className="profile-card">
-        <h3>Recent Appointments</h3>
-
-        {appointments.length === 0 ? (
-          <p>No appointments found.</p>
-        ) : (
-          <table className="appointment-table">
-            <thead>
-              <tr>
-                <th>Doctor</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {appointments.map((appointment) => (
-                <tr key={appointment.id}>
-                  <td>
-                    {appointment.doctors?.full_name}
-                  </td>
-
-                  <td>
-                    {appointment.appointment_date}
-                  </td>
-
-                  <td>
-                    {appointment.appointment_time}
-                  </td>
-
-                  <td>
-                    <span
-                      className={`status ${appointment.status.toLowerCase()}`}
-                    >
-                      {appointment.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <p>
+          <strong>Gender:</strong>{" "}
+          {profile.gender || "Not added"}
+        </p>
       </div>
     </DashboardLayout>
   );

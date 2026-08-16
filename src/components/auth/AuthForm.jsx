@@ -35,9 +35,10 @@ const AuthForm = ({
             password,
           });
 
-        if (loginError) {
-          throw loginError;
-        }
+       if (loginError) {
+  console.log("LOGIN ERROR:", loginError);
+  throw loginError;
+}
 
         if (role === "doctor") {
           navigate("/doctor/dashboard");

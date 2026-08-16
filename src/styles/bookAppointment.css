@@ -1,47 +1,164 @@
-.appointment-page{
-display:flex;
-justify-content:center;
-align-items:center;
-min-height:100vh;
-background:#f5f7fb;
-padding:40px;
+/* ================================
+   BOOK APPOINTMENT PAGE
+================================ */
+
+.book-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  background: #fcfbfe;
 }
 
-.appointment-form{
-width:100%;
-max-width:500px;
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,.1);
-display:flex;
-flex-direction:column;
-gap:15px;
+
+/* ================================
+   FORM CARD
+================================ */
+
+.book-form {
+  width: 100%;
+  max-width: 560px;
+  padding: 35px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 35px rgba(47, 53, 66, 0.10);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid #f0ecf8;
 }
 
-.appointment-form h2{
-text-align:center;
-color:#6f5aa8;
+
+/* ================================
+   HEADING
+================================ */
+
+.book-form h2 {
+  margin: 0 0 20px;
+  text-align: center;
+  color: #2f3542;
+  font-size: 28px;
 }
 
-.appointment-form input,
-.appointment-form textarea{
-padding:12px;
-border:1px solid #ddd;
-border-radius:8px;
-font-size:15px;
+.book-form h2::after {
+  content: "";
+  display: block;
+  width: 55px;
+  height: 3px;
+  margin: 10px auto 0;
+  background: #8a6fd1;
+  border-radius: 10px;
 }
 
-.appointment-form button{
-padding:12px;
-background:#6f5aa8;
-color:white;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-size:16px;
+
+/* ================================
+   LABELS
+================================ */
+
+.book-form label {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2f3542;
 }
 
-.appointment-form button:hover{
-background:#5a4790;
+
+/* ================================
+   INPUTS
+================================ */
+
+.book-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #ddd7eb;
+  border-radius: 10px;
+  background: #faf9fd;
+  color: #2f3542;
+  font-size: 15px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.book-form input:focus {
+  border-color: #8a6fd1;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(138, 111, 209, 0.12);
+}
+
+.book-form input[readonly] {
+  background: #f5f2fb;
+  color: #6b7280;
+  cursor: default;
+}
+
+
+/* ================================
+   DATE & TIME
+================================ */
+
+.book-form input[type="date"],
+.book-form input[type="time"] {
+  cursor: pointer;
+}
+
+
+/* ================================
+   BUTTON
+================================ */
+
+.book-form button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #8a6fd1;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.book-form button:hover {
+  background: #7358c3;
+  transform: translateY(-1px);
+}
+
+.book-form button:disabled {
+  background: #b9b1cc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* ================================
+   NO DOCTOR
+================================ */
+
+.book-container h2 {
+  color: #2f3542;
+  text-align: center;
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 600px) {
+  .book-container {
+    padding: 20px 15px;
+  }
+
+  .book-form {
+    padding: 25px 20px;
+    border-radius: 14px;
+  }
+
+  .book-form h2 {
+    font-size: 24px;
+  }
 }

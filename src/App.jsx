@@ -37,23 +37,59 @@ function Home() {
 function App() {
   return (
     <Routes>
-      {/* Public Pages */}
+      {/* =========================
+          PUBLIC PAGES
+      ========================== */}
+
       <Route path="/" element={<Home />} />
 
       <Route path="/doctors" element={<Doctors />} />
-      <Route path="/book-appointment" element={<BookAppointment />} />
 
-      {/* Authentication */}
-      <Route path="/doctor/login" element={<DoctorLogin />} />
-      <Route path="/doctor/register" element={<DoctorRegister />} />
-      <Route path="/patient/login" element={<PatientLogin />} />
-      <Route path="/patient/register" element={<PatientRegister />} />
+      {/* =========================
+          AUTHENTICATION
+      ========================== */}
 
-      {/* Doctor Dashboard */}
+      <Route
+        path="/doctor/login"
+        element={<DoctorLogin />}
+      />
+
+      <Route
+        path="/doctor/register"
+        element={<DoctorRegister />}
+      />
+
+      <Route
+        path="/patient/login"
+        element={<PatientLogin />}
+      />
+
+      <Route
+        path="/patient/register"
+        element={<PatientRegister />}
+      />
+
+      {/* =========================
+          PATIENT BOOKING
+      ========================== */}
+
+      <Route
+        path="/book-appointment"
+        element={
+          <ProtectedRoute role="patient">
+            <BookAppointment />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* =========================
+          DOCTOR DASHBOARD
+      ========================== */}
+
       <Route
         path="/doctor/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="doctor">
             <DoctorDashboard />
           </ProtectedRoute>
         }
@@ -62,7 +98,7 @@ function App() {
       <Route
         path="/doctor/profile"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="doctor">
             <DoctorProfile />
           </ProtectedRoute>
         }
@@ -71,17 +107,20 @@ function App() {
       <Route
         path="/doctor/appointments"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="doctor">
             <DoctorAppointments />
           </ProtectedRoute>
         }
       />
 
-      {/* Patient Dashboard */}
+      {/* =========================
+          PATIENT DASHBOARD
+      ========================== */}
+
       <Route
         path="/patient/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="patient">
             <PatientDashboard />
           </ProtectedRoute>
         }
@@ -90,7 +129,7 @@ function App() {
       <Route
         path="/appointments"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="patient">
             <Appointments />
           </ProtectedRoute>
         }
@@ -99,7 +138,7 @@ function App() {
       <Route
         path="/dashboard/doctors"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="patient">
             <DoctorList />
           </ProtectedRoute>
         }
