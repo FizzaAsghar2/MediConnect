@@ -1,0 +1,13 @@
+.doctors-page { min-height: 100vh; background: radial-gradient(circle at 80% 0%, rgba(146,216,222,.22), transparent 30%), var(--color-bg); padding: 74px 20px 110px; }
+.doctors-page h1 { color: var(--color-secondary); text-align: center; font-size: clamp(2.2rem, 5vw, 3.4rem); letter-spacing: -.04em; margin-bottom: 10px; }
+.doctors-page > .container > p { max-width: 560px; text-align: center; color: var(--color-text-muted); margin: 0 auto 48px; }
+.doctor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 24px; }
+.doctor-card { background: rgba(255,255,255,.9); border: 1px solid var(--color-border); border-radius: 24px; padding: 26px; text-align: center; box-shadow: var(--shadow-sm); transition: var(--transition); }
+.doctor-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); border-color: #b7dce2; }
+.doctor-card img { width: 122px; height: 122px; border: 5px solid var(--color-primary-soft); border-radius: 50%; object-fit: cover; margin: 0 auto 20px; }
+.doctor-card h3 { color: var(--color-secondary); margin-bottom: 14px; font-size: 1.2rem; }
+.doctor-card p { color: var(--color-text-muted); margin: 8px 0; font-size: .92rem; }
+.doctor-card p strong { color: var(--color-text-main); }
+.doctor-card button { margin-top: 19px; padding: 12px 20px; border: 0; border-radius: 12px; background: var(--color-primary); color: #fff; font-weight: 700; cursor: pointer; transition: var(--transition); }
+.doctor-card button:hover { background: var(--color-primary-hover); transform: translateY(-2px); }
+@media (max-width: 768px) { .doctors-page { padding: 54px 15px 80px; } }
