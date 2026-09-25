@@ -48,6 +48,38 @@ export function AuthProvider({ children }) {
       };
     }
 
+    // Recover profiles for accounts created before the database trigger was applied.
+    const metadataRole = currentUser.user_metadata?.role;
+    const profileTable = metadataRole === "doctor" ? "doctors" : "patients";
+    const profileValues = metadataRole === "doctor"
+      ? {
+          id: currentUser.id,
+          full_name: currentUser.user_metadata?.full_name || "",
+          email: currentUser.email || "",
+          specialty: currentUser.user_metadata?.specialty || "General Physician",
+        }
+      : {
+          id: currentUser.id,
+          full_name: currentUser.user_metadata?.full_name || "",
+          email: currentUser.email || "",
+        };
+
+    const { data: recoveredProfile, error: recoveryError } = await supabase
+      .from(profileTable)
+      .upsert(profileValues, { onConflict: "id" })
+      .select()
+      .single();
+
+    if (!recoveryError && recoveredProfile) {
+      setProfile(recoveredProfile);
+      setRole(profileTable === "doctors" ? "doctor" : "patient");
+
+      return {
+        profile: recoveredProfile,
+        role: profileTable === "doctors" ? "doctor" : "patient",
+      };
+    }
+
     setProfile(null);
     setRole(null);
 

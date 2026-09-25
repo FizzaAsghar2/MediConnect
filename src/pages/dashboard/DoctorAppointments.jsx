@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import useProfile from "../../hooks/useProfile";
+import { FaCalendarDays, FaCheck, FaClock, FaEnvelope, FaXmark } from "react-icons/fa6";
 
 function DoctorAppointments() {
   const { profile, loading } = useProfile("doctor");
@@ -102,7 +103,7 @@ function DoctorAppointments() {
 
   return (
     <DashboardLayout>
-      <div className="appointments-page">
+      <div className="appointments-page doctor-appointments-page">
 
         <div className="appointments-header">
           <div>
@@ -134,10 +135,7 @@ function DoctorAppointments() {
         ) : (
           <div className="appointments-grid">
             {appointments.map((appointment) => (
-              <div
-                key={appointment.id}
-                className="appointment-card"
-              >
+              <article key={appointment.id} className="appointment-card">
                 <div className="appointment-card-header">
                   <div className="doctor-info">
                     <div className="doctor-avatar">
@@ -147,12 +145,14 @@ function DoctorAppointments() {
                     </div>
 
                     <div>
+                      <small className="request-label">Patient request</small>
                       <h3>
                         {appointment.patients?.full_name ||
                           "Unknown Patient"}
                       </h3>
 
-                      <span>
+                      <span className="patient-email">
+                        <FaEnvelope />
                         {appointment.patients?.email ||
                           "Email not available"}
                       </span>
@@ -169,7 +169,7 @@ function DoctorAppointments() {
                 <div className="appointment-details">
 
                   <div className="appointment-detail">
-                    <span className="detail-icon">📅</span>
+                    <span className="detail-icon"><FaCalendarDays /></span>
 
                     <div>
                       <small>Appointment Date</small>
@@ -182,7 +182,7 @@ function DoctorAppointments() {
                   </div>
 
                   <div className="appointment-detail">
-                    <span className="detail-icon">🕐</span>
+                    <span className="detail-icon"><FaClock /></span>
 
                     <div>
                       <small>Appointment Time</small>
@@ -210,9 +210,7 @@ function DoctorAppointments() {
                           )
                         }
                       >
-                        {processingId === appointment.id
-                          ? "Processing..."
-                          : "✓ Approve"}
+                        {processingId === appointment.id ? "Updating..." : <><FaCheck /> Approve</>}
                       </button>
 
                       <button
@@ -225,25 +223,25 @@ function DoctorAppointments() {
                           )
                         }
                       >
-                        Cancel
+                        <><FaXmark /> Decline</>
                       </button>
                     </div>
                   )}
 
                   {appointment.status === "Approved" && (
                     <div className="approved-message">
-                      ✓ Appointment approved
+                      <FaCheck /> Appointment approved
                     </div>
                   )}
 
                   {appointment.status === "Cancelled" && (
                     <div className="cancelled-message">
-                      Appointment cancelled
+                      <FaXmark /> Appointment declined
                     </div>
                   )}
 
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}

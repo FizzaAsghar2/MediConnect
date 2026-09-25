@@ -299,6 +299,17 @@
   line-height: 1.5;
 }
 
+.auth-success {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid #b8dfcf;
+  border-radius: 10px;
+  background: #effaf5;
+  color: #176044;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 /* ================= BUTTON ================= */
 
 .auth-btn {

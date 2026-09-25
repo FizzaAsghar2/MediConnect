@@ -15,6 +15,7 @@ const AuthForm = ({
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -23,13 +24,14 @@ const AuthForm = ({
     e.preventDefault();
 
     setError("");
+    setMessage("");
     setLoading(true);
 
     try {
       if (!isRegister) {
         /* ================= LOGIN ================= */
 
-        const { data, error: loginError } =
+        const { error: loginError } =
           await supabase.auth.signInWithPassword({
             email,
             password,
@@ -58,6 +60,7 @@ const AuthForm = ({
           data: {
             role,
             full_name: name,
+            specialty: specialization,
           },
         },
       });
@@ -72,36 +75,11 @@ const AuthForm = ({
         throw new Error("Unable to create account.");
       }
 
-      if (role === "patient") {
-        const { error: patientError } = await supabase
-          .from("patients")
-          .insert([
-            {
-              id: userId,
-              full_name: name,
-              email,
-            },
-          ]);
-
-        if (patientError) {
-          throw patientError;
-        }
-      }
-
-      if (role === 'doctor') {
-  const { error: doctorInsertError } = await supabase
-    .from("doctors")
-    .insert([
-      {
-        id: userId,
-        full_name: name,
-        email,
-        specialty: specialization || "General Physician",
-      },
-    ]);
-
-  if (doctorInsertError) throw doctorInsertError;
-
+      if (!data.session) {
+        setMessage(
+          "Your account was created. Check your email to confirm it, then log in."
+        );
+        return;
       }
 
       /*
@@ -126,6 +104,7 @@ const AuthForm = ({
         });
       }
     } catch (err) {
+      setMessage("");
       setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
@@ -138,6 +117,12 @@ const AuthForm = ({
       {error && (
         <div className="auth-error">
           {error}
+        </div>
+      )}
+
+      {message && (
+        <div className="auth-success">
+          {message}
         </div>
       )}
 

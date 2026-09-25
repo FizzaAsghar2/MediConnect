@@ -11,11 +11,11 @@
   --color-success: #16825d;
   --color-warning: #b86b00;
   --color-error: #c2414d;
-  --color-bg: #f4f8fb;
+  --color-bg: #f4f8f5;
   --color-white: #ffffff;
   --color-text-main: #173042;
-  --color-text-muted: #66808e;
-  --color-border: #dce8ee;
+  --color-text-muted: #617b7a;
+  --color-border: #d8e5e0;
   --shadow-sm: 0 8px 24px rgba(18, 48, 71, 0.07);
   --shadow-md: 0 16px 38px rgba(18, 48, 71, 0.11);
   --shadow-lg: 0 24px 65px rgba(18, 48, 71, 0.16);

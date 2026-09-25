@@ -1,4 +1,4 @@
-import { FaFacebookF, FaInstagram, FaLinkedinIn, FaLocationDot, FaPhone, FaEnvelope } from "react-icons/fa6";
+import { FaArrowRight, FaFacebookF, FaInstagram, FaLinkedinIn, FaLocationDot, FaPhone, FaEnvelope } from "react-icons/fa6";
 import "../styles/footer.css";
 
 function Footer() {
@@ -6,14 +6,12 @@ function Footer() {
     <footer className="footer">
       <div className="container footer-container">
 
-        <div className="footer-box">
-          <h2>
-  Medi<span style={{ color: "#F3EEFF" }}>Connect</span>
-</h2>
+        <div className="footer-box footer-intro">
+          <h2>Medi<span>Connect</span></h2>
           <p>
-            Your trusted online healthcare platform connecting patients with
-            qualified doctors anytime, anywhere.
+            A calmer way to find trusted care, whenever you need it.
           </p>
+          <a className="footer-cta" href="/doctors">Find your doctor <FaArrowRight /></a>
         </div>
 
         <div className="footer-box">

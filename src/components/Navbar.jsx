@@ -1,4 +1,4 @@
-import { FaUserDoctor } from "react-icons/fa6";
+import { FaArrowRight, FaUserDoctor } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import "./../styles/navbar.css";
 
@@ -23,7 +23,7 @@ function Navbar() {
         </div>
 
         {/* Navigation */}
-        <nav>
+        <nav aria-label="Primary navigation">
           <ul className="nav-links">
             <li>
               <Link to="/">Home</Link>
@@ -59,12 +59,8 @@ function Navbar() {
             Register
           </button>
 
-          <button
-            className="login-btn"
-            onClick={() => navigate("/doctor/login")}
-            title="Doctor Login"
-          >
-            Doctor
+          <button className="doctor-link" onClick={() => navigate("/doctor/login")}>
+            For doctors <FaArrowRight />
           </button>
         </div>
 
